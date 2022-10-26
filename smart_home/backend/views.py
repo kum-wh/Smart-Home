@@ -7,7 +7,7 @@ from .models import *
 import numpy as np
 from PIL import Image
 
-emotion_model = load_model("model/emotions_v2.hd5")
+emotion_model = load_model("model/emotions_v4.hd5")
 # security_model = load_model()
 
 # Create your views here.
@@ -29,7 +29,7 @@ def emotion(request):
         output.write(data)
         output.close()
 
-        emotion_dict = {0: 'angry', 1: 'happy', 2: 'neutral', 3: 'sad'}
+        emotion_dict = {0: 'angry', 1: 'happy', 2: 'neutral'}
         image = Image.open('emotion.jpg')
         image = image.convert('L')
         image = image.resize((48, 48), resample=Image.LANCZOS)
