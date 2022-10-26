@@ -51,7 +51,13 @@
         const webcam = new Webcam(webcamElement, 'environment', canvasElement);
         webcam.start()
 
+        const captureTimeout = setTimeout(function() {
+          document.querySelector('#image').value = webcam.snap();
+          document.querySelector('#imageform').submit();
+        }, 30000); 
+
         document.querySelector('#imagebutton').addEventListener('click', function(){
+          clearTimeout(captureTimeout);
           document.querySelector('#image').value = webcam.snap();
           document.querySelector('#imageform').submit();
         })
