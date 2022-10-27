@@ -7,7 +7,7 @@ from .models import *
 import numpy as np
 from PIL import Image
 
-emotion_model = load_model("model/emotions_v4.hd5")
+# emotion_model = load_model("model/emotions_v4.hd5")
 # security_model = load_model()
 
 # Create your views here.
