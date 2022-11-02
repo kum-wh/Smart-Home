@@ -1,5 +1,6 @@
 import urllib
-# import cv2
+import imutils
+import cv2
 from keras.models import load_model
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
@@ -7,8 +8,10 @@ from .models import *
 import numpy as np
 from PIL import Image
 
-# emotion_model = load_model("model/emotions_v4.hd5")
-# security_model = load_model()
+emotion_model = load_model("model/emotions_v4.hd5")
+
+hog = cv2.HOGDescriptor()
+hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
 
 # Create your views here.
 
@@ -36,8 +39,6 @@ def emotion(request):
         img_array = np.array(image) / 255.0
         final_array = np.expand_dims(img_array, axis = 0)
         image = image.save('emotion.jpg', quality=95)
-
-        # image =  cv2.imread("emotion.jpg")
         
         result = emotion_model.predict(final_array)
         max_class = np.argmax(result)
@@ -68,7 +69,24 @@ def security(request):
         output = open("security.jpg","wb")
         output.write(data)
         output.close()
-        # image =  cv2.imread("security.jpg")
+
+        image = cv2.imread("security.jpg")
+        image = imutils.resize(image, width = min(800, image.shape[1]))
+
+        bounding_box_coordinates, weights = hog.detectMultiScale(image, winStride = (4, 4),
+                padding = (8, 8), scale = 1.03)
+
+        person = 0
+        for x, y, w, h in bounding_box_coordinates:
+            image = cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            image = cv2.putText(image, f'person {person}', (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,
+                0, 255), 1)
+            person += 1
+
+        cv2.imwrite('security.jpg', image)
+        
+        print("Humans detected: %d" % person)
+
         '''
         number = model.predict(image)
         state = State.objects.get(id=0)
