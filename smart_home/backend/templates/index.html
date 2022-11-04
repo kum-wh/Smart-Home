@@ -32,8 +32,8 @@
         </nav>
       </div>
       
-      <form action="{% url 'index' %}" method="post">
-        <input type="number" id="rnumber">
+      <form action="{% url 'index' %}" method="post"> {% csrf_token %}
+        <input type="number" name="rnumber">
         <input type="submit" value="Submit">
       </form>
 

@@ -18,8 +18,9 @@ hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
 def index(request):
     if request.method == "POST":
         number = request.POST.get('rnumber')
-        state = State.objects.get(id=0)
+        state = State.objects.get(id=1)
         state.number = number
+        state.save()
     return render(request, "index.html")
 
 
@@ -55,8 +56,9 @@ def emotion(request):
             colour == 0 "white"
         '''
 
-        # state = State.objects.get(id=0)
-        # state.emotion = emotion_dict[themax]
+        state = State.objects.get(id=1)
+        state.emotion = max_class
+        state.save()
         
     return render(request, "emotion.html")
 
@@ -94,13 +96,17 @@ def security(request):
         if rnumber > state.number:
             raise flag
         '''
+        state = State.objects.get(id=1)
+        state.humans = person
+        state.save()
+
     return render(request, "security.html")
 
 
 def getemo(request):
-    '''
-    state = State.objects.get(id=0)
+    
+    state = State.objects.get(id=1)
     value = state.emotion
-    '''
-    value = 0
+    
+    # value = 0
     return HttpResponse(f'{value}')
