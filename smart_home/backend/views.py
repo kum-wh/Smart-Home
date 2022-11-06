@@ -4,6 +4,7 @@ import cv2
 from keras.models import load_model
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
+from django.core.mail import send_mail
 from .models import *
 import numpy as np
 from PIL import Image
@@ -65,6 +66,11 @@ def emotion(request):
 
 def security(request):
     if request.method == "POST":
+
+        state = State.objects.get(id=1)
+        expected_humans = state.number 
+        print("Expected humans: %d" % expected_humans)
+
         link = request.POST.get('image')
         f = urllib.request.urlopen(link)
         data = f.read()
@@ -89,6 +95,16 @@ def security(request):
         
         print("Humans detected: %d" % person)
 
+        if person > expected_humans:
+            send_mail(
+                    'INTRUDER ALERT',
+                    'Hi User,\n\nAn intruder has been captured by your security camera. Please take necessary action as soon as possible.\n',
+                    'noreply.smarthome3237@gmail.com',
+                    ['pzhixiang.99@gmail.com'],
+                    fail_silently = False,
+                )
+            print('Intruder alert')
+
         '''
         number = model.predict(image)
         state = State.objects.get(id=0)
@@ -96,7 +112,7 @@ def security(request):
         if rnumber > state.number:
             raise flag
         '''
-        state = State.objects.get(id=1)
+
         state.humans = person
         state.save()
 
