@@ -105,7 +105,7 @@ def security(request):
                 <br>
                 <br>An intruder has been captured by your security camera. Please take necessary action as soon as possible.
                 <br>
-                <img src="cid:security.jpg" />
+                <br><img src="cid:security.jpg" />
                 <br>
                 </p>
             <body>
@@ -121,10 +121,9 @@ def security(request):
             )
             message.mixed_subtype = 'related'
             message.attach_alternative(body_html, "text/html")
-            img_dir = 'static'
             image = 'security.jpg'
-            file_path = os.path.join(img_dir, image)
-            with open(file_path, 'r') as f:
+            file_path = image
+            with open(file_path, 'rb') as f:
                 img = MIMEImage(f.read())
                 img.add_header('Content-ID', '<{name}>'.format(name = image))
                 img.add_header('Content-Disposition', 'inline', filename = image)
