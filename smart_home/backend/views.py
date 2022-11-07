@@ -1,32 +1,44 @@
-import urllib
-import imutils
-import cv2
-from keras.models import load_model
+# import urllib
+# import imutils
+# import cv2
+# from keras.models import load_model
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
-from django.core.mail import send_mail
+from django.db import IntegrityError
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.urls import reverse
+# from django.core.mail import send_mail
 from .models import *
-import numpy as np
-from PIL import Image
-
+# import numpy as np
+# from PIL import Image
+'''
 emotion_model = load_model("model/emotions_v4.hd5")
 
 hog = cv2.HOGDescriptor()
 hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
-
+'''
 # Create your views here.
 
 def index(request):
+    return render(request, "index.html")
+
+
+@login_required(login_url="/login")
+def home(request):
     if request.method == "POST":
         number = request.POST.get('rnumber')
         state = State.objects.get(id=1)
         state.number = number
         state.save()
-    return render(request, "index.html")
+    return render(request, "home.html")
 
 
+@login_required(login_url="/login")
 def emotion(request):
     if request.method == "POST":
+        '''
         link = request.POST.get('image')
         f = urllib.request.urlopen(link)
         data = f.read()
@@ -45,7 +57,7 @@ def emotion(request):
         result = emotion_model.predict(final_array)
         max_class = np.argmax(result)
         print("Detected %s with confidence %3.2f" % (emotion_dict[max_class], result[0][max_class]))
-
+        '''
         '''
         if max_class == "angry":
             colour = 1"purple"
@@ -64,9 +76,10 @@ def emotion(request):
     return render(request, "emotion.html")
 
 
+@login_required(login_url="/login")
 def security(request):
     if request.method == "POST":
-
+        '''
         state = State.objects.get(id=1)
         expected_humans = state.number 
         print("Expected humans: %d" % expected_humans)
@@ -104,7 +117,7 @@ def security(request):
                     fail_silently = False,
                 )
             print('Intruder alert')
-
+        '''
         '''
         number = model.predict(image)
         state = State.objects.get(id=0)
@@ -112,10 +125,10 @@ def security(request):
         if rnumber > state.number:
             raise flag
         '''
-
+        '''
         state.humans = person
         state.save()
-
+        '''
     return render(request, "security.html")
 
 
@@ -126,3 +139,55 @@ def getemo(request):
     
     # value = 0
     return HttpResponse(f'{value}')
+
+
+def login_view(request):
+    if request.method == "POST":
+
+        # Attempt to sign user in
+        username = request.POST["username"]
+        password = request.POST["password"]
+        user = authenticate(request, username=username, password=password)
+
+        # Check if authentication successful
+        if user is not None:
+            login(request, user)
+            return HttpResponseRedirect(reverse("home"))
+        else:
+            return render(request, "login.html", {
+                "message": "Invalid username and/or password."
+            })
+    else:
+        return render(request, "login.html")
+
+
+def logout_view(request):
+    logout(request)
+    return HttpResponseRedirect(reverse("index"))
+
+
+def register(request):
+    if request.method == "POST":
+        username = request.POST["username"]
+        email = request.POST["email"]
+
+        # Ensure password matches confirmation
+        password = request.POST["password"]
+        confirmation = request.POST["confirmation"]
+        if password != confirmation:
+            return render(request, "register.html", {
+                "message": "Passwords must match."
+            })
+
+        # Attempt to create new user
+        try:
+            user = User.objects.create_user(username, email, password)
+            user.save()
+        except IntegrityError:
+            return render(request, "register.html", {
+                "message": "Username already taken."
+            })
+        login(request, user)
+        return HttpResponseRedirect(reverse("home"))
+    else:
+        return render(request, "register.html")
