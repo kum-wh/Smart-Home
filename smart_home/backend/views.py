@@ -8,6 +8,7 @@ from django.core.mail import send_mail
 from .models import *
 import numpy as np
 from PIL import Image
+from django.views.decorators.csrf import csrf_exempt
 
 emotion_model = load_model("model/emotions_v4.hd5")
 
@@ -126,3 +127,16 @@ def getemo(request):
     
     # value = 0
     return HttpResponse(f'{value}')
+
+@csrf_exempt
+def slave(request):
+    state = State.objects.get(id=1)
+    slave = state.slave
+
+    if request.method == "POST":
+        slave = request.body
+        state.slave = slave
+        state.save()
+
+    return HttpResponse(f'{slave}')
+
