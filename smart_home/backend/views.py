@@ -96,10 +96,24 @@ def security(request):
         
         print("Humans detected: %d" % person)
 
+        body_html = '''
+        <html>
+            <body>
+                <p>Hi User,
+                <br>
+                <br>An intruder has been captured by your security camera. Please take necessary action as soon as possible.
+                <br>
+                <img src="cid:security.jpg" />
+                <br>
+                </p>
+            <body>
+        </html>
+        '''
+
         if person > expected_humans:
             send_mail(
                     'INTRUDER ALERT',
-                    'Hi User,\n\nAn intruder has been captured by your security camera. Please take necessary action as soon as possible.\n',
+                    body_html,
                     'noreply.smarthome3237@gmail.com',
                     ['pzhixiang.99@gmail.com'],
                     fail_silently = False,
