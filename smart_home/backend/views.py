@@ -9,6 +9,8 @@ from .models import *
 import numpy as np
 from PIL import Image
 from django.views.decorators.csrf import csrf_exempt
+from email.mime.image import MIMEImage
+from django.core.mail import EmailMultiAlternatives
 
 emotion_model = load_model("model/emotions_v4.hd5")
 
@@ -111,14 +113,25 @@ def security(request):
         '''
 
         if person > expected_humans:
-            send_mail(
+            message = EmailMultiAlternatives(
                     'INTRUDER ALERT',
                     body_html,
-                    'noreply.smarthome3237@gmail.com',
-                    ['pzhixiang.99@gmail.com'],
-                    fail_silently = False,
-                )
-            print('Intruder alert')
+                    from_email = 'noreply.smarthome3237@gmail.com',
+                    to = ['pzhixiang.99@gmail.com']
+            )
+            message.mixed_subtype = 'related'
+            message.attach_alternative(body_html, "text/html")
+            img_dir = 'static'
+            image = 'security.jpg'
+            file_path = os.path.join(img_dir, image)
+            with open(file_path, 'r') as f:
+                img = MIMEImage(f.read())
+                img.add_header('Content-ID', '<{name}>'.format(name = image))
+                img.add_header('Content-Disposition', 'inline', filename = image)
+                message.attach(img)
+
+            message.send()
+            print("Intruder Alert")
 
         '''
         number = model.predict(image)
